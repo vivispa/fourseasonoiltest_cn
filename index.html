@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>四季精油 VIVIBEAUTY - 身体状态检测</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* 延续 VIVIBEAUTY 品牌配色 */
+            --primary-blue: #1a3c78;   /* 瓶身深蓝 */
+            --accent-red: #c24343;     /* 强调色 */
+            --warm-bg: #f4f0e8;        /* 暖米色背景 */
+            --card-bg: #ffffff;
+            --text-dark: #333333;
+            --text-light: #555555;
+            --border-color: #e0d6cc;
+            --selected-bg: #edf4fc;
+        }
+
+        body {
+            /* 字体调整为适合简体中文的 Microsoft YaHei */
+            font-family: 'Noto Sans SC', "Microsoft YaHei", "SimHei", sans-serif;
+            background-color: var(--warm-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+            margin: 0;
+            padding: 30px 20px;
+            display: flex;
+            justify-content: center;
+            background-image: linear-gradient(to bottom, #f4f0e8, #e8e0d5);
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(26, 60, 120, 0.1);
+            border-top: 6px solid var(--primary-blue);
+        }
+
+        /* 标题区域 */
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            color: var(--primary-blue);
+            margin: 0 0 10px 0;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+        }
+
+        .subtitle {
+            color: var(--accent-red);
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        /* 检测问题区域 */
+        .question-section {
+            margin-bottom: 30px;
+        }
+
+        .question-title {
+            font-size: 1.25em;
+            font-weight: bold;
+            margin-bottom: 25px;
+            text-align: center;
+            color: var(--primary-blue);
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        /* 格状选项布局 */
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        /* 自定义 Checkbox 卡片样式 */
+        .checkbox-item {
+            position: relative;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .checkbox-item label {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            background: #fff;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+            color: var(--text-light);
+            height: 100%;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        .checkbox-item label:hover {
+            border-color: var(--primary-blue);
+            background: #fafafa;
+        }
+
+        /* 打勾图标 (未选取时隐藏) */
+        .checkbox-item label::before {
+            content: '';
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            margin-right: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            background-color: #fff;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+            
+            /* SVG 打勾图标 */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 0%;
+        }
+
+        /* 选取状态 (Checked) */
+        .checkbox-item input[type="checkbox"]:checked + label {
+            background-color: var(--selected-bg);
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(26, 60, 120, 0.1);
+        }
+
+        .checkbox-item input[type="checkbox"]:checked + label::before {
+            background-color: var(--accent-red);
+            border-color: var(--accent-red);
+            background-size: 80%;
+        }
+
+        /* 按钮样式 */
+        .btn-container {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        button {
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 15px 60px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(26, 60, 120, 0.3);
+        }
+
+        button:hover {
+            background-color: var(--accent-red);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(194, 67, 67, 0.4);
+        }
+
+        /* 结果显示区域 */
+        #result-area {
+            display: none;
+            margin-top: 50px;
+            border-top: 1px solid #eee;
+            padding-top: 40px;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .result-container {
+            display: flex;
+            flex-direction: row;
+            gap: 40px;
+            align-items: center;
+            background: #fff;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        /* 产品图片区 */
+        .result-image {
+            flex: 1;
+            max-width: 300px;
+            text-align: center;
+        }
+
+        .result-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            /* 加上一点阴影让瓶子更立体 */
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.15));
+        }
+
+        /* 文字内容区 */
+        .result-content {
+            flex: 1.5;
+        }
+
+        .result-title {
+            font-size: 2em;
+            color: var(--primary-blue);
+            margin-bottom: 20px;
+            border-bottom: 4px solid var(--accent-red);
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        .analysis-box, .recommend-box {
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .analysis-box {
+            background-color: #fdfdfd;
+            border-left: 5px solid var(--accent-red);
+        }
+
+        .recommend-box {
+            background-color: var(--selected-bg);
+            border-left: 5px solid var(--primary-blue);
+        }
+
+        .label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        
+        .label.red { color: var(--accent-red); }
+        .label.blue { color: var(--primary-blue); }
+
+        .text-content {
+            font-size: 1.05em;
+            color: #444;
+        }
+
+        .oil-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: var(--primary-blue);
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* RWD 响应式调整 */
+        @media (max-width: 768px) {
+            .result-container {
+                flex-direction: column;
+            }
+            .result-image {
+                max-width: 200px;
+            }
+            .checkbox-grid {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 25px;
+            }
+            h1 { font-size: 1.8em; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>四季精油 VIVIBEAUTY</h1>
+        <div class="subtitle">身心状态检测与调理建议</div>
+    </header>
+    
+    <div class="question-section">
+        <div class="question-title">请勾选您近期最常出现的身体状态（可复选）：</div>
+        <form id="quiz-form">
+            <div class="checkbox-grid" id="symptoms-container">
+                </div>
+            
+            <div class="btn-container">
+                <button type="button" onclick="calculateResult()">分析我的状态</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="result-area">
+        <div class="result-container">
+            <div class="result-image">
+                <img id="res-img" src="" alt="推荐精油">
+            </div>
+
+            <div class="result-content">
+                <h2 class="result-title" id="res-category">检测结果</h2>
+                
+                <div class="analysis-box">
+                    <span class="label red">📋 检测结果建议：</span>
+                    <div id="res-advice" class="text-content"></div>
+                </div>
+
+                <div class="recommend-box">
+                    <span class="label blue">💧 推荐对应用油：</span>
+                    <span id="res-oil-name" class="oil-name"></span>
+                    <div id="res-oil-desc" class="text-content"></div>
+                </div>
+
+                <div style="text-align: right; margin-top: 20px;">
+                    <button type="button" onclick="resetForm()" style="background-color: #999; font-size: 0.9em; padding: 10px 30px; box-shadow: none;">重新检测</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 数据来源：基于文档内容转换为简体中文 
+    const data = {
+        spring: {
+            id: 'spring',
+            name: '春甘 (Spring)',
+            //
+            symptoms: [
+                "睡眠质量差", "容易面红", "脸部色斑", "皮肤偏黄", "视力减退",
+                "肩颈酸痛", "偏头胀痛", "关节不灵活", "情绪不稳", "耳鸣头晕"
+            ],
+            //
+            advice: "目前显示您排毒系统，这方面需要特别加强。",
+            //
+            oilName: "春甘四季油",
+            oilDesc: "主要调节是帮助启动并净化身体的排毒通道，代谢身体积累的废物与沉滞感，让您轻松调节循环、恢复平衡更健康。",
+            imgSrc: "spring.png" // 需放置对应图片
+        },
+        summer: {
+            id: 'summer',
+            name: '夏心 (Summer)',
+            //
+            symptoms: [
+                "容易疲惫", "胸闷烦躁", "颈部僵硬", "心律不齐", "肠胃差",
+                "容易水肿", "体脂过高", "泌尿道妇科问题", "汗液不均(过多或过少)", "容易油光"
+            ],
+            //
+            advice: "目前显示您新陈代谢系统，这方面需要特别加强。",
+            //
+            oilName: "夏心四季油",
+            oilDesc: "专注于优化新陈代谢机能，帮助身体更有效率地转化能量、维持活力，让您轻松调节循环、恢复平衡更健康。",
+            imgSrc: "summer.png"
+        },
+        autumn: {
+            id: 'autumn',
+            name: '秋菲 (Autumn)',
+            //
+            symptoms: [
+                "不易入睡", "容易感冒", "不自主深呼吸", "抵抗力较弱", "换季容易过敏",
+                "皮肤干燥", "排便不顺", "饮食不正常", "喝水量不足", "支气管较弱"
+            ],
+            //
+            advice: "目前显示您免疫系统，这方面需要特别加强。",
+            //
+            oilName: "秋菲四季油",
+            oilDesc: "重于强健与平衡免疫系统，为身体筑起一道保护防线，帮助您适应季节转换，稳固内在状态，从容面对外在环境的挑战。",
+            imgSrc: "autumn.png"
+        },
+        winter: {
+            id: 'winter',
+            name: '冬盛 (Winter)',
+            //
+            symptoms: [
+                "四肢冰冷", "容易胀气", "小腹突出", "妇科问题", "容易腰酸",
+                "肌肉松弛", "血循差", "喜欢肉食", "昼夜颠倒", "不容易放松"
+            ],
+            //
+            advice: "目前显示您血液循环系统，这方面需要特别加强。",
+            //
+            oilName: "冬盛四季油",
+            oilDesc: "重点在于温养并促进血液循环，如同为身体带来内在的暖流，帮助调节改善因身体循环不均而导致的压力与不适，维持全身的温暖与通畅。",
+            imgSrc: "winter.png"
+        }
+    };
+
+    // 初始化页面
+    function init() {
+        const container = document.getElementById('symptoms-container');
+        let allSymptoms = [];
+
+        // 收集所有症状
+        Object.keys(data).forEach(key => {
+            data[key].symptoms.forEach(sym => {
+                allSymptoms.push({ text: sym, type: key });
+            });
+        });
+
+        // 这里可以加入随机排序功能，如果需要请取消注释
+        // allSymptoms = shuffle(allSymptoms);
+
+        // 生成 HTML
+        allSymptoms.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'checkbox-item';
+            div.innerHTML = `
+                <input type="checkbox" id="sym-${index}" name="symptom" value="${item.type}">
+                <label for="sym-${index}">${item.text}</label>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    // 计算并显示结果
+    function calculateResult() {
+        const checkboxes = document.querySelectorAll('input[name="symptom"]:checked');
+        
+        if (checkboxes.length === 0) {
+            alert("请至少勾选一个符合您状态的选项！");
+            return;
+        }
+
+        const scores = { spring: 0, summer: 0, autumn: 0, winter: 0 };
+
+        checkboxes.forEach(box => {
+            scores[box.value]++;
+        });
+
+        // 找出最高分
+        let maxScore = -1;
+        let maxKey = '';
+
+        // 依序判断 (若同分，依照 春->夏->秋->冬 优先序)
+        ['spring', 'summer', 'autumn', 'winter'].forEach(key => {
+            if (scores[key] > maxScore) {
+                maxScore = scores[key];
+                maxKey = key;
+            }
+        });
+
+        showResult(data[maxKey]);
+    }
+
+    function showResult(resultData) {
+        document.getElementById('res-category').innerText = resultData.name;
+        document.getElementById('res-advice').innerText = resultData.advice;
+        document.getElementById('res-oil-name').innerText = resultData.oilName;
+        document.getElementById('res-oil-desc').innerText = resultData.oilDesc;
+        
+        // 设定图片
+        const imgElement = document.getElementById('res-img');
+        imgElement.src = resultData.imgSrc;
+        imgElement.alt = resultData.oilName;
+        // 如果图片读取失败(用户未放入图片)，显示默认文字以免破版
+        imgElement.onerror = function() {
+            this.style.display = 'none';
+        };
+        imgElement.onload = function() {
+            this.style.display = 'block';
+        };
+
+        const resultArea = document.getElementById('result-area');
+        resultArea.style.display = 'block';
+        
+        // 平滑滚动至结果区
+        resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function resetForm() {
+        document.getElementById('quiz-form').reset();
+        document.getElementById('result-area').style.display = 'none';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function shuffle(array) {
+        let currentIndex = array.length,  randomIndex;
+        while (currentIndex != 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [
+                array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    }
+
+    // 启动程序
+    init();
+
+</script>
+
+</body>
+</html>
